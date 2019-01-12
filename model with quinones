@@ -1,0 +1,66 @@
+library(deSolve)
+
+#library(deSolve)
+s=1/2 # sex ratio
+i=1/4 #increase in the production of quinone/female beetle
+r <- 2.5; #intrinsic growth rate
+K <- 5000; #carrying capacity
+p0<-0.01 # baseline production of quinones
+pch <-0.60 #proportion of cheaters
+ch<- (1-pch) # proportion of individuals which are not cheaters
+
+DDE1 <- function(t,y, parms) {
+  tlag <- t-1 #lag value
+  if (tlag <= 0)
+    z <- 2
+  else
+    z <- lagvalue(tlag)
+  dy = (r * y * (1-z/K))
+  list(dy = (r * y * (1-z/K)), z)
+}
+#this function defines the baseline population dynamics without any quinones
+yinit <- 2 
+times <- seq(from = 0, to = 50, by = .001)
+yout  <- dede(y = yinit, times = times, func = DDE1,
+              parms = NULL)
+#plot(yout[,2])
+#yout
+
+#this function does it with the presence of quinones 
+DDE1 <- function(t, y, parms) {
+  tlag <- t-1
+  if (tlag <= 0)
+    z <- 2
+    else
+    z <- lagvalue(tlag)
+  
+  #i<- i-(0.25*i)
+list(dy=(r * y * (1-z/K)-(p0*(y^2)*s*i*(1-z/K))+(p0*y*(1-z/K))),z)
+}
+#this function does it with the presence of quinones and cheaters
+yinit <- 2
+times <- seq(from = 0, to = 50, by =.001)
+yout1  <- dede(y = yinit, times = times, func = DDE1,
+              parms = NULL)
+par(mfrow=c(1,1))
+
+DDE1 <- function(t, y, parms) {
+  tlag <- t-1
+  if (tlag <= 0)
+    z <- 2
+  else
+    z <- lagvalue(tlag)
+  
+  #i<- i-(0.25*i)
+  list(dy=(r * y * (1-z/K)-(p0*(y^2)*ch*s*i*(1-z/K))+(p0*y*ch*(1-z/K))),z)
+}
+yinit <- 2
+times <- seq(from = 0, to = 50, by =.001)
+yout2  <- dede(y = yinit, times = times, func = DDE1,
+               parms = NULL)
+par(cex=1.0,xpd=TRUE)
+matplot(yout[,1],cbind(yout[,2],yout1[,2],yout2[,2]),col=c('red','green','blue'),bty='L',pch='.',xlab="Number of generations",ylab="population size")
+par(cex=0.8)
+legend("topright", y.intersp = 1,x.intersp = 1,xpd=20, cex=0.75,inset=c(0,0),c("W/O Quinones", "W/ Quinones","W/cheaters"),lwd=c(1), col=c("red", "green","blue"), lty = c(1))
+
+
